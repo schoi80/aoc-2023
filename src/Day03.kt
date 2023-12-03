@@ -4,20 +4,25 @@ fun main() {
 
     val input = readInput("Day03")
 
-    fun Char.isSymbol() = !isDigit() && this != '.'
+    fun RowCol.isOutOfBounds(): Boolean {
+        val inRange = first >= 0 && first < input.size && second >= 0 && second < input[first].length
+        return !inRange
+    }
 
-    fun isPartNumber(row: Int, col: Int): Boolean {
-        println("evaluating input[$row][$col]")
-        if (input[row][col].isDigit()) {
-            val rows = ((row - 1)..(row + 1)).filter {
-                it >= 0 && it < input.size
-            }
-            val cols = ((col - 1)..(col + 1)).filter {
-                it >= 0 && it < input[row].length
-            }
-            rows.forEach { r ->
-                cols.forEach { c ->
-                    if (input[r][c].isSymbol())
+    fun RowCol.isSymbol(): Boolean {
+        if (!this.isOutOfBounds()) {
+            val c = input[first][second]
+            return !c.isDigit() && c != '.'
+        }
+        return false
+    }
+
+    fun RowCol.isPartNumber(): Boolean {
+        println("evaluating input[$first][$second]")
+        if (input[first][second].isDigit()) {
+            ((first - 1)..(first + 1)).forEach { r ->
+                ((second - 1)..(second + 1)).forEach { c ->
+                    if ((r to c).isSymbol())
                         return true
                 }
             }
@@ -30,7 +35,7 @@ fun main() {
         val regex = "\\d+".toRegex()
         val result = regex.findAll(line).filter {
             it.range.forEach { col ->
-                if (isPartNumber(row, col)) {
+                if ((row to col).isPartNumber()) {
                     println("${it.value} is part")
                     return@filter true
                 }
@@ -40,20 +45,11 @@ fun main() {
         return result
     }
 
-    fun isPartNumber2(rc: RowCol): RowCol? {
-        val row = rc.first
-        val col = rc.second
-        println("evaluating input[$row][$col]")
-        if (input[row][col].isDigit()) {
-            val rows = ((row - 1)..(row + 1)).filter {
-                it >= 0 && it < input.size
-            }
-            val cols = ((col - 1)..(col + 1)).filter {
-                it >= 0 && it < input[row].length
-            }
-            rows.forEach { r ->
-                cols.forEach { c ->
-                    if (input[r][c].isSymbol())
+    fun RowCol.isPartNumber2(): RowCol? {
+        if (input[first][second].isDigit()) {
+            ((first - 1)..(first + 1)).forEach { r ->
+                ((second - 1)..(second + 1)).forEach { c ->
+                    if ((r to c).isSymbol())
                         return r to c
                 }
             }
@@ -64,11 +60,10 @@ fun main() {
     fun findNumber2(row: Int): List<Pair<Int, RowCol>> {
         val line = input[row]
         val regex = "\\d+".toRegex()
-        val result = regex.findAll(line).mapNotNull {
-            it.range.forEach { col ->
-                val symbolCoordinate = isPartNumber2(row to col)
-                if (symbolCoordinate != null) {
-                    return@mapNotNull it.value.toInt() to symbolCoordinate
+        val result = regex.findAll(line).mapNotNull {mr ->
+            mr.range.forEach { col ->
+                (row to col).isPartNumber2()?.let {
+                    return@mapNotNull mr.value.toInt() to it
                 }
             }
             null
