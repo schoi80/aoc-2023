@@ -60,7 +60,7 @@ fun main() {
     fun findNumber2(row: Int): List<Pair<Int, RowCol>> {
         val line = input[row]
         val regex = "\\d+".toRegex()
-        val result = regex.findAll(line).mapNotNull {mr ->
+        return regex.findAll(line).mapNotNull {mr ->
             mr.range.forEach { col ->
                 (row to col).isPartNumber2()?.let {
                     return@mapNotNull mr.value.toInt() to it
@@ -68,7 +68,6 @@ fun main() {
             }
             null
         }.toList()
-        return result
     }
 
     fun part1(input: List<String>): Int {
