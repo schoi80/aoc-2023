@@ -1,3 +1,5 @@
+typealias RowCol = Pair<Int, Int>
+
 fun main() {
 
     val input = readInput("Day03")
@@ -38,7 +40,9 @@ fun main() {
         return result
     }
 
-    fun isPartNumber2(row: Int, col: Int): Pair<Int, Int>? {
+    fun isPartNumber2(rc: RowCol): RowCol? {
+        val row = rc.first
+        val col = rc.second
         println("evaluating input[$row][$col]")
         if (input[row][col].isDigit()) {
             val rows = ((row - 1)..(row + 1)).filter {
@@ -57,12 +61,12 @@ fun main() {
         return null
     }
 
-    fun findNumber2(row: Int): List<Pair<Int, Pair<Int, Int>>> {
+    fun findNumber2(row: Int): List<Pair<Int, RowCol>> {
         val line = input[row]
         val regex = "\\d+".toRegex()
         val result = regex.findAll(line).mapNotNull {
             it.range.forEach { col ->
-                val symbolCoordinate = isPartNumber2(row, col)
+                val symbolCoordinate = isPartNumber2(row to col)
                 if (symbolCoordinate != null) {
                     return@mapNotNull it.value.toInt() to symbolCoordinate
                 }
@@ -81,8 +85,8 @@ fun main() {
     fun part2(input: List<String>): Int {
         return input.indices.flatMap { row ->
             findNumber2(row)
-        }.filter { (_, gear) ->
-            input[gear.first][gear.second] == '*'
+        }.filter { (_, rc) ->
+            input[rc.first][rc.second] == '*'
         }.groupBy {
             it.second
         }.filterValues {
