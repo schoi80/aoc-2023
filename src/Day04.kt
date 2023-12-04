@@ -4,8 +4,8 @@ fun main() {
 
     val input = readInput("Day04")
 
-    fun winningNumbers(line: String): Set<String> {
-        return line.split("|")[0].trim()
+    fun String.winningNumbers(): Set<String> {
+        return split("|")[0].trim()
             .split(":")[1].trim()
             .split("\\s+".toRegex()).toSet()
     }
@@ -27,14 +27,14 @@ fun main() {
     }
 
     fun part1(input: List<String>): Int {
-        return input.sumOf { line -> line.score(winningNumbers(line)) }
+        return input.sumOf { line -> line.score(line.winningNumbers()) }
     }
 
     fun part2(input: List<String>): Int {
         val copies = mutableMapOf<Int, Int>()
         input.forEachIndexed { i, line ->
             copies[i] = copies[i] ?: 1
-            val count = line.matchCount(winningNumbers(line))
+            val count = line.matchCount(line.winningNumbers())
             if (count > 0) {
                 (1..count).forEach {
                     val gameCard = it + i
@@ -42,7 +42,6 @@ fun main() {
                 }
             }
         }
-        copies.println()
         return copies.values.sum()
     }
 
