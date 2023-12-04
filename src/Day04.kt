@@ -18,12 +18,11 @@ fun main() {
     }
 
     fun String.score(winNums: Set<String>): Int {
-        val count = matchCount(winNums)
-        if (count == 1)
-            return 1
-        else if (count > 1)
-            return 2.0.pow(count - 1).toInt()
-        else return 0
+        return matchCount(winNums).let {
+            if (it >= 1)
+                2.0.pow(it - 1).toInt()
+            else 0
+        }
     }
 
     fun part1(input: List<String>): Int {
@@ -38,7 +37,7 @@ fun main() {
             if (count > 0) {
                 (1..count).forEach {
                     val gameCard = it + i
-                    copies[gameCard] = copies[i]!! + (copies[i + it] ?: 1)
+                    copies[gameCard] = copies[i]!! + (copies[gameCard] ?: 1)
                 }
             }
         }
