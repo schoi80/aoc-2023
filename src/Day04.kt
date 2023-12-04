@@ -24,8 +24,8 @@ fun main() {
     }
 
     fun part1(input: List<String>): Int {
-        return input.sumOf {line ->
-            winningNumbers(line).let {winningNumbers ->
+        return input.sumOf { line ->
+            winningNumbers(line).let { winningNumbers ->
                 score(line, winningNumbers).also { println("score: $it") }
             }
         }
@@ -35,12 +35,13 @@ fun main() {
         val copies = mutableMapOf<Int, Int>()
         input.forEachIndexed { i, line ->
             copies[i] = copies[i] ?: 1
-            val win = winningNumbers(line)
-            val count = score2(line, win)
-            if (count > 0) {
-                (1..count).forEach {
-                    val gameCard = it + i
-                    copies[gameCard] = copies[i]!! + (copies[i + it] ?: 1)
+            winningNumbers(line).let { winningNumbers ->
+                val count = score2(line, winningNumbers)
+                if (count > 0) {
+                    (1..count).forEach {
+                        val gameCard = it + i
+                        copies[gameCard] = copies[i]!! + (copies[i + it] ?: 1)
+                    }
                 }
             }
         }
