@@ -2,16 +2,16 @@ import java.util.SortedSet
 import kotlin.math.min
 import kotlin.time.measureTimedValue
 
-typealias VMap = Pair<LongRange, LongRange>
+typealias VMap = Pair<LongRange, Long>
 
 fun main() {
 
-    val input = readInput("Day05")
+    val input = readInput("sample")
 
     fun String.splitRange(): VMap {
         val p = split("\\s+".toRegex())
         val r = p[2].toLong()
-        val dr = p[0].toLong().let { it until it + r }
+        val dr = p[0].toLong() //.let { it until it + r }
         val sr = p[1].toLong().let { it until it + r }
         return sr to dr
     }
@@ -21,7 +21,7 @@ fun main() {
     fun VMap.get(source: Long): Long {
         if (this.first.contains(source)) {
             val (sr, dr) = this
-            return dr.min() + (source - sr.min())
+            return dr + (source - sr.min())
         }
         return source
     }
@@ -46,8 +46,12 @@ fun main() {
             return listOf(range)
         val result = mutableListOf<LongRange>()
         var head = range.first
-        forEach { vmap ->
+        for (vmap in this) {
             val sourceRange = vmap.sourceRange()
+            if (sourceRange.last < range.first) {
+                println("skip")
+                continue
+            }
             if (sourceRange.first > head) {
                 result.add(head..<sourceRange.first)
                 val end = min(range.last, sourceRange.last)
@@ -59,8 +63,9 @@ fun main() {
                 result.add(vmap.get(start)..vmap.get(end))
                 head = end + 1
             }
-            if (head > range.last)
+            if (head > range.last) {
                 return@measureTimedValue result
+            }
         }
         return@measureTimedValue result
     }.let {
@@ -117,7 +122,6 @@ fun main() {
             acc.flatMap { map.mapRange(it) }
         }.minOf { it.first }
     }
-
 
     part1(input).println()
     part2(input).println()
