@@ -6,7 +6,7 @@ typealias VMap = Pair<LongRange, Long>
 
 fun main() {
 
-    val input = readInput("sample")
+    val input = readInput("Day05")
 
     fun String.splitRange(): VMap {
         val p = split("\\s+".toRegex())
@@ -73,6 +73,78 @@ fun main() {
         it.value
     }
 
+    fun SortedSet<VMap>.mapRange(rl: List<LongRange>): List<LongRange> = measureTimedValue {
+        var rangeIndex = 0
+        var vmapIndex = 0
+        val vmapList = this.toList()
+        val result = mutableListOf<LongRange>()
+
+        fun getSourceRange(i: Int) = vmapList[i].sourceRange()
+        fun getRange(i: Int) = rl[i]
+        var head = rl[0].first
+        while (vmapIndex < this.size && rangeIndex < rl.size && head < rl.last().last) {
+            var sourceRange = getSourceRange(vmapIndex)
+            var range = getRange(rangeIndex)
+
+
+            if (sourceRange.last < range.first) {
+                vmapIndex++
+                continue
+            }
+
+            if (sourceRange.first > range.last) {
+                rangeIndex++
+                continue
+            }
+
+            head = range.first
+            while (vmapIndex < this.size && rangeIndex < rl.size) {
+                sourceRange = getSourceRange(vmapIndex)
+                range = getRange(rangeIndex)
+                val vmap = vmapList[vmapIndex]
+
+                if (sourceRange.first > head) {
+                    result.add(head..<sourceRange.first)
+                    val end = min(range.last, sourceRange.last)
+                    val rToAdd = vmap.get(sourceRange.first)..vmap.get(end)
+                    result.add(rToAdd)
+                    head = end + 1
+                } else if (sourceRange.first <= head && head <= sourceRange.last) {
+                    val start = head
+                    val end = min(sourceRange.last, range.last)
+                    val rToAdd = vmap.get(start)..vmap.get(end)
+                    result.add(rToAdd)
+                    head = end + 1
+                }
+
+                if (head > sourceRange.last)
+                    vmapIndex++
+
+                if (head > range.last) {
+                    rangeIndex++
+                    break
+                }
+            }
+        }
+        if (head < rl.last().last) {
+            result.add(head..getRange(rangeIndex).last)
+            result.addAll(rl.subList(rangeIndex+1, rl.size))
+        }
+        val queue = mutableListOf<LongRange>()
+        result.sortedBy { it.first }.forEach {
+            queue.lastOrNull()?.let {lastElem ->
+                if (lastElem.last + 1 == it.first) {
+                    queue.removeLast()
+                    queue.add(lastElem.first()..it.last)
+                } else queue.add(it)
+            } ?: queue.add(it)
+        }
+        return@measureTimedValue queue
+    }.let {
+        println("SortedSet<VMap>.mapRange took ${it.duration}")
+        it.value
+    }
+
     fun part1(input: List<String>): Long {
         val input = input.filter { it.isNotBlank() }
         val seeds = input[0].split(":")[1].trim().split("\\s+".toRegex()).map { it.trim().toLong() }
@@ -119,10 +191,10 @@ fun main() {
         mapList.println()
 
         return mapList.fold(seeds) { acc, map ->
-            acc.flatMap { map.mapRange(it) }
-        }.minOf { it.first }
+            map.mapRange(acc).also { println(it) }
+        }[0].first
     }
 
-    part1(input).println()
+//    part1(input).println()
     part2(input).println()
 }
