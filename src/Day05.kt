@@ -128,11 +128,11 @@ fun main() {
         }
         if (head < rl.last().last) {
             result.add(head..getRange(rangeIndex).last)
-            result.addAll(rl.subList(rangeIndex+1, rl.size))
+            result.addAll(rl.subList(rangeIndex + 1, rl.size))
         }
         val queue = mutableListOf<LongRange>()
         result.sortedBy { it.first }.forEach {
-            queue.lastOrNull()?.let {lastElem ->
+            queue.lastOrNull()?.let { lastElem ->
                 if (lastElem.last + 1 == it.first) {
                     queue.removeLast()
                     queue.add(lastElem.first()..it.last)
@@ -195,6 +195,6 @@ fun main() {
         }[0].first
     }
 
-//    part1(input).println()
+    part1(input).println()
     part2(input).println()
 }
