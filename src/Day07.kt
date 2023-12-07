@@ -15,9 +15,8 @@ fun main() {
         return Triple(h, bid, this)
     }
 
-    fun Map<Char, Int>.score(): Int {
-        val h = this.values.sorted() //.also { it.println() }
-        return when (h) {
+    fun List<Int>.rank(): Int {
+        return when (this) {
             listOf(5) -> 1
             listOf(1, 4) -> 2
             listOf(2, 3) -> 3
@@ -28,6 +27,7 @@ fun main() {
         }
     }
 
+    fun Map<Char, Int>.score() = this.values.sorted().rank()
 
     fun Char.score(): Int {
         return when (this) {
@@ -65,15 +65,7 @@ fun main() {
         else
             h[h.size - 1] += countJ
 
-        return when (h) {
-            listOf(5) -> 1
-            listOf(1, 4) -> 2
-            listOf(2, 3) -> 3
-            listOf(1, 1, 3) -> 4
-            listOf(1, 2, 2) -> 5
-            listOf(1, 1, 1, 2) -> 6
-            else -> 7
-        }
+        return h.rank()
     }
 
     fun Char.score2(): Int {
