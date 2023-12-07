@@ -73,7 +73,7 @@ fun main() {
             'A' -> 1
             'K' -> 2
             'Q' -> 3
-            'J' -> 15 // J gets super-power
+            'J' -> 15 // J gets dwarfed
             'T' -> 5
             else -> 10 - this.digitToInt() + 5
         }
