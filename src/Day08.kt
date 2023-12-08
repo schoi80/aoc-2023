@@ -20,12 +20,10 @@ fun main() {
     fun part1(input: List<String>): Long {
         val instruction = input[0]
         var stepCount = 0
-        var isDone = false
         var currNode = "AAA"
-        while (!isDone) {
+        while (currNode != "ZZZ") {
             val index = stepCount % instruction.length
             currNode = currNode.nextNode(instruction[index])
-            isDone = currNode == "ZZZ"
             stepCount++
         }
 
