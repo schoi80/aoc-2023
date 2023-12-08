@@ -11,6 +11,12 @@ fun main() {
         node to steps
     }
 
+    fun String.nextNode(i:Char): String {
+        return if (i == 'L')
+            nodes[this]!!.first
+        else nodes[this]!!.second
+    }
+
     fun part1(input: List<String>): Long {
         val instruction = input[0]
         var stepCount = 0
@@ -18,9 +24,7 @@ fun main() {
         var currNode = "AAA"
         while (!isDone) {
             val index = stepCount % instruction.length
-            currNode = if (instruction[index] == 'L')
-                nodes[currNode]!!.first
-            else nodes[currNode]!!.second
+            currNode = currNode.nextNode(instruction[index])
             isDone = currNode == "ZZZ"
             stepCount++
         }
@@ -28,63 +32,31 @@ fun main() {
         return stepCount.toLong()
     }
 
+    fun gcd(a: Long, b: Long): Long {
+        return if (b == 0L) a else gcd(b, a % b)
+    }
+
+    fun lcm(a: Long, b: Long): Long {
+        return (a * b) / gcd(a, b)
+    }
 
     fun part2(input: List<String>): Long {
         val start = nodes.keys.filter { it.last() == 'A' }
         val instruction = input[0]
 
-        fun String.isDone(): Long {
+        fun String.countStepsToZ(): Long {
             var currNode = this
             var stepCount = 0L
-            while (true) {
+            while (currNode.last() != 'Z') {
                 val index = stepCount % instruction.length
-                currNode = if (instruction[index.toInt()] == 'L')
-                    nodes[currNode]!!.first
-                else nodes[currNode]!!.second
-
+                currNode = currNode.nextNode(instruction[index.toInt()])
                 stepCount++
-
-                if (currNode.last() == 'Z')
-                    break
             }
             return stepCount
         }
 
-        fun gcd(a: Long, b: Long): Long {
-            return if (b == 0L) a else gcd(b, a % b)
-        }
-
-        fun lcm(a: Long, b: Long): Long {
-            return (a * b) / gcd(a, b)
-        }
-
-        return start.map { it.isDone() }.reduce { acc, i -> lcm(acc, i) }
+        return start.map { it.countStepsToZ() }.reduce { acc, i -> lcm(acc, i) }
     }
-//
-//    fun part2(input: List<String>): Long {
-//        var start = steps.keys.filter { it.last() == 'A' }
-//        fun List<String>.isDone() = this.count{ it.last() == 'Z' } == start.size
-//        val inst = input[0]
-//        var curr = 0
-//        var done = false
-//
-//        while (!done) {
-//            val index = curr % inst.length
-//            val dir = inst[index]
-//            println("$dir: $start")
-//            start = start.map {
-//                val next = steps[it]
-//                when (dir) {
-//                    'L' -> next!!.first
-//                    else -> next!!.second
-//                }
-//            }
-//            done = start.isDone()
-//            curr++
-//        }
-//        println("DONE: $start")
-//        return curr.toLong()
-//    }
 
     part1(input).println()
     part2(input).println()
