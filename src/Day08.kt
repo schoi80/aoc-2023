@@ -17,7 +17,8 @@ fun main() {
         var isDone = false
         var currNode = "AAA"
         while (!isDone) {
-            currNode = if (instruction[stepCount.mod(instruction.length)] == 'L')
+            val index = stepCount.mod(instruction.length)
+            currNode = if (instruction[index] == 'L')
                 nodes[currNode]!!.first
             else nodes[currNode]!!.second
             isDone = currNode == "ZZZ"
@@ -32,22 +33,21 @@ fun main() {
         val start = nodes.keys.filter { it.last() == 'A' }
         val instruction = input[0]
 
-        fun String.isDone(): List<Long> {
+        fun String.isDone(): Long {
             var currNode = this
-            val endsInZ = mutableListOf<Long>()
-            var stepCount = 0
+            var stepCount = 0L
             while (true) {
                 val index = stepCount.mod(instruction.length)
                 currNode = if (instruction[index] == 'L')
                     nodes[currNode]!!.first
                 else nodes[currNode]!!.second
-                if (currNode.last() == 'Z')
-                    endsInZ.add((stepCount + 1).toLong())
-                if (endsInZ.size > 0 && stepCount >= instruction.length - 1)
-                    break
+
                 stepCount++
+
+                if (currNode.last() == 'Z')
+                    break
             }
-            return endsInZ
+            return stepCount
         }
 
         fun gcd(a: Long, b: Long): Long {
@@ -58,7 +58,7 @@ fun main() {
             return (a * b) / gcd(a, b)
         }
 
-        return start.map { it.isDone().first() }.reduce { acc, i -> lcm(acc, i) }
+        return start.map { it.isDone() }.reduce { acc, i -> lcm(acc, i) }
     }
 //
 //    fun part2(input: List<String>): Long {
