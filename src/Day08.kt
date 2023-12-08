@@ -17,7 +17,7 @@ fun main() {
         var isDone = false
         var currNode = "AAA"
         while (!isDone) {
-            val index = stepCount.mod(instruction.length)
+            val index = stepCount % instruction.length
             currNode = if (instruction[index] == 'L')
                 nodes[currNode]!!.first
             else nodes[currNode]!!.second
@@ -37,8 +37,8 @@ fun main() {
             var currNode = this
             var stepCount = 0L
             while (true) {
-                val index = stepCount.mod(instruction.length)
-                currNode = if (instruction[index] == 'L')
+                val index = stepCount % instruction.length
+                currNode = if (instruction[index.toInt()] == 'L')
                     nodes[currNode]!!.first
                 else nodes[currNode]!!.second
 
@@ -69,7 +69,7 @@ fun main() {
 //        var done = false
 //
 //        while (!done) {
-//            val index = curr.mod(inst.length)
+//            val index = curr % inst.length
 //            val dir = inst[index]
 //            println("$dir: $start")
 //            start = start.map {
