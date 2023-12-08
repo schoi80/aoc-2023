@@ -2,78 +2,53 @@ fun main() {
 
     val input = readInput("Day08")
 
+    val nodes = (2..<input.size).associate { i ->
+        val line = input[i].split("=")
+        val node = line[0].trim()
+        val steps = line[1].split(",").map { it.trim() }.let {
+            it[0].substring(1) to it[1].dropLast(1)
+        }
+        node to steps
+    }
+
     fun part1(input: List<String>): Long {
-
-        val steps = mutableMapOf<String, Pair<String, String>>()
-        for (i in (2..<input.size)) {
-            val line = input[i].split("=")
-            val step = line[0].trim()
-            steps[step] = line[1].split(",").map { it.trim() }.let {
-                val l = it[0].substring(1)
-                val r = it[1].dropLast(1)
-                l to r
-            }
-        }
-        steps.println()
-
-        val inst = input[0]
-        var curr = 0
-
-        var done = false
-        var step = "AAA"
-        while (!done) {
-            val index = curr.mod(inst.length)
-            step = when (inst[index]) {
-                'L' -> steps[step]!!.first
-                else -> steps[step]!!.second
-            }
-            done = step == "ZZZ"
-            curr++
+        val instruction = input[0]
+        var stepCount = 0
+        var isDone = false
+        var currNode = "AAA"
+        while (!isDone) {
+            currNode = if (instruction[stepCount.mod(instruction.length)] == 'L')
+                nodes[currNode]!!.first
+            else nodes[currNode]!!.second
+            isDone = currNode == "ZZZ"
+            stepCount++
         }
 
-        return curr.toLong()
+        return stepCount.toLong()
     }
 
 
-
     fun part2(input: List<String>): Long {
-        val steps = mutableMapOf<String, Pair<String, String>>()
-        for (i in (2..<input.size)) {
-            val line = input[i].split("=")
-            val step = line[0].trim()
-            steps[step] = line[1].split(",").map { it.trim() }.let {
-                val l = it[0].substring(1)
-                val r = it[1].dropLast(1)
-                l to r
-            }
-        }
-        steps.println()
+        val start = nodes.keys.filter { it.last() == 'A' }
+        val instruction = input[0]
 
-
-        val start = steps.keys.filter { it.last() == 'A' }
-
-        val inst = input[0]
-
-        fun String.run() : List<Long>{
-            var start = this
+        fun String.isDone(): List<Long> {
+            var currNode = this
             val endsInZ = mutableListOf<Long>()
-            for (i in (0..Int.MAX_VALUE)) {
-                val index = i.mod(inst.length)
-                start = if (inst[index] == 'L')
-                    steps[start]!!.first
-                else steps[start]!!.second
-                if (start.last() == 'Z')
-                    endsInZ.add((i + 1).toLong())
-
-                if (endsInZ.size > 0 && i >= inst.length - 1) {
-                    return endsInZ
-                }
-
+            var stepCount = 0
+            while (true) {
+                val index = stepCount.mod(instruction.length)
+                currNode = if (instruction[index] == 'L')
+                    nodes[currNode]!!.first
+                else nodes[currNode]!!.second
+                if (currNode.last() == 'Z')
+                    endsInZ.add((stepCount + 1).toLong())
+                if (endsInZ.size > 0 && stepCount >= instruction.length - 1)
+                    break
+                stepCount++
             }
-            error("should never happen")
+            return endsInZ
         }
-        println("START: $start")
-        val r = start.map { it.run().first() }
 
         fun gcd(a: Long, b: Long): Long {
             return if (b == 0L) a else gcd(b, a % b)
@@ -83,29 +58,14 @@ fun main() {
             return (a * b) / gcd(a, b)
         }
 
-        return r.reduce{acc, i -> lcm(acc, i)}
+        return start.map { it.isDone().first() }.reduce { acc, i -> lcm(acc, i) }
     }
 //
 //    fun part2(input: List<String>): Long {
-//        val steps = mutableMapOf<String, Pair<String, String>>()
-//        for (i in (2..<input.size)) {
-//            val line = input[i].split("=")
-//            val step = line[0].trim()
-//            steps[step] = line[1].split(",").map { it.trim() }.let {
-//                val l = it[0].substring(1)
-//                val r = it[1].dropLast(1)
-//                l to r
-//            }
-//        }
-//        steps.println()
-//
 //        var start = steps.keys.filter { it.last() == 'A' }
-//
 //        fun List<String>.isDone() = this.count{ it.last() == 'Z' } == start.size
-//
 //        val inst = input[0]
 //        var curr = 0
-//
 //        var done = false
 //
 //        while (!done) {
