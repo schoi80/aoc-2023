@@ -12,23 +12,17 @@ fun List<Long>.extrapolate(): List<List<Long>> {
 }
 
 fun List<List<Long>>.lastSeq(): Long {
-    var curr = 0L
-    for (i in (this.size - 1) downTo 0) {
-        if (curr == 0L)
-            curr = this[i].last()
-        else curr += this[i].last()
+    return ((this.size - 1) downTo 0).fold(0L) { acc, i ->
+        if (acc == 0L) this[i].last()
+        else acc + this[i].last()
     }
-    return curr
 }
 
 fun List<List<Long>>.firstSeq(): Long {
-    var curr = 0L
-    for (i in (this.size - 1) downTo 0) {
-        if (curr == 0L)
-            curr = this[i].first()
-        else curr = this[i].first() - curr
+    return ((this.size - 1) downTo 0).fold(0L) { acc, i ->
+        if (acc == 0L) this[i].first()
+        else this[i].first() - acc
     }
-    return curr
 }
 
 fun main() {
