@@ -5,10 +5,10 @@ fun List<Long>.extrapolate(): List<List<Long>> {
 
     // smh....... wtf!!!!
 //    if (r.sum() == 0L)
-    if (r.count{it == 0L} == r.size)
+    if (r.count { it == 0L } == r.size)
         return listOf(this)
-    else
-        return mutableListOf(this).apply { addAll(r.extrapolate()) }
+
+    return mutableListOf(this).apply { addAll(r.extrapolate()) }
 }
 
 fun List<List<Long>>.lastSeq(): Long {
@@ -36,31 +36,27 @@ fun main() {
     val input = readInput("Day09")
 
     fun part1(input: List<String>): Long {
-        return input.map { line ->
+        return input.sumOf { line ->
             line.split("\\s+".toRegex())
                 .map { it.trim().toLong() }
                 .extrapolate()
                 .onEach { println(it) }
                 .lastSeq()
                 .also { println("extrapolated: $it") }
-        }.also {
-            println(it)
-        }.sum()
+        }
     }
 
     fun part2(input: List<String>): Long {
-        return input.map { line ->
+        return input.sumOf { line ->
             line.split("\\s+".toRegex())
                 .map { it.trim().toLong() }
                 .extrapolate()
                 .onEach { println(it) }
                 .firstSeq()
                 .also { println("extrapolated: $it") }
-        }.also {
-            println(it)
-        }.sum()
+        }
     }
 
-//    part1(input).println()
+    part1(input).println()
     part2(input).println()
 }
