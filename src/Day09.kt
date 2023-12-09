@@ -40,9 +40,9 @@ fun main() {
             line.split("\\s+".toRegex())
                 .map { it.trim().toLong() }
                 .extrapolate()
-                .onEach { println(it) }
+//                .onEach { println(it) }
                 .lastSeq()
-                .also { println("extrapolated: $it") }
+//                .also { println("extrapolated: $it") }
         }
     }
 
@@ -51,9 +51,9 @@ fun main() {
             line.split("\\s+".toRegex())
                 .map { it.trim().toLong() }
                 .extrapolate()
-                .onEach { println(it) }
+//                .onEach { println(it) }
                 .firstSeq()
-                .also { println("extrapolated: $it") }
+//                .also { println("extrapolated: $it") }
         }
     }
 
