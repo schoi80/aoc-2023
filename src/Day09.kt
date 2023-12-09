@@ -1,14 +1,8 @@
 fun List<Long>.extrapolate(): List<List<Long>> {
-    val r = (1..<this.size).map { i ->
-        this[i] - this[i - 1]
+    return (1..<this.size).map { i -> this[i] - this[i - 1] }.let {
+        if (it.all { it == 0L }) listOf(this)
+        else mutableListOf(this).apply { addAll(it.extrapolate()) }
     }
-
-    // smh....... wtf!!!!
-//    if (r.sum() == 0L)
-    if (r.count { it == 0L } == r.size)
-        return listOf(this)
-
-    return mutableListOf(this).apply { addAll(r.extrapolate()) }
 }
 
 fun List<List<Long>>.lastSeq(): Long {
