@@ -3,9 +3,6 @@ import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
 
-typealias Input = List<String>
-
-
 /**
  * Reads lines from the given input txt file.
  */
