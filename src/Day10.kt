@@ -1,218 +1,169 @@
 import java.util.LinkedList
 
+typealias Input = List<String>
 
-fun String.upscaleH(): String {
-    val newStr = this.map { "$it " }.joinToString("")
-    return newStr.indices.map {
-        if (it == newStr.length - 1) {
-            '.'
-        } else if (newStr[it] == ' ') {
-            val prev = newStr[it - 1]
-            val next = newStr[it + 1]
-            if (setOf('-', 'F', 'L', 'S').contains(prev) && setOf('-', 'J', '7', 'S').contains(next))
-                '-'
-            else '.'
-        } else newStr[it]
-    }.joinToString("")
-}
-fun main() {
-
-    val input = readInput("Day10").map { it.upscaleH() }
+fun Input.upscale(): Input {
+    return this.map { line ->
+        val newStr = line.map { "$it " }.joinToString("")
+        newStr.indices.map {
+            if (it == newStr.length - 1) {
+                '.'
+            } else if (newStr[it] == ' ') {
+                val prev = newStr[it - 1]
+                val next = newStr[it + 1]
+                if (setOf('-', 'F', 'L', 'S').contains(prev) && setOf('-', 'J', '7', 'S').contains(next))
+                    '-'
+                else '.'
+            } else newStr[it]
+        }.joinToString("")
+    }
         .map { listOf(it, CharArray(it.length) { '|' }.joinToString("")) }
         .flatten()
-        .onEach { println(it) }
+}
 
+fun Input.isOutOfBounds(rc: RowCol): Boolean {
+    val inRange = rc.first >= 0 && rc.first < this.size && rc.second >= 0 && rc.second < this[rc.first].length
+    return !inRange
+}
 
-    fun RowCol.isOutOfBounds(): Boolean {
-        val inRange = first >= 0 && first < input.size && second >= 0 && second < input[first].length
-        return !inRange
-    }
+fun Input.get(rc: RowCol): Char {
+    return this[rc.first][rc.second]
+}
 
-    fun RowCol.get(): Char {
-        val (i, j) = this
-        return input[i][j]
-    }
+fun Input.isConnected(n1: RowCol, n2: RowCol): Boolean {
+    val (i1, j1) = n1
+    val (i2, j2) = n2
+    val v1 = this.get(n1)
+    val v2 = this.get(n2)
+    return (v1 == 'F' && setOf('-', '7', 'J').contains(v2) && i1 == i2 && j1 + 1 == j2) ||
+            (v1 == 'F' && setOf('|', 'J', 'L').contains(v2) && i1 + 1 == i2 && j1 == j2) ||
+            (v1 == 'L' && setOf('|', 'F', '7').contains(v2) && i1 - 1 == i2 && j1 == j2) ||
+            (v1 == 'L' && setOf('-', 'J', '7').contains(v2) && i1 == i2 && j1 + 1 == j2) ||
+            (v1 == '7' && setOf('|', 'J', 'L').contains(v2) && i1 + 1 == i2 && j1 == j2) ||
+            (v1 == '7' && setOf('-', 'L', 'F').contains(v2) && i1 == i2 && j1 - 1 == j2) ||
+            (v1 == 'J' && setOf('|', '7', 'F').contains(v2) && i1 - 1 == i2 && j1 == j2) ||
+            (v1 == 'J' && setOf('-', 'L', 'F').contains(v2) && i1 == i2 && j1 - 1 == j2) ||
+            (v1 == '-' && setOf('-', 'J', '7').contains(v2) && i1 == i2 && j1 + 1 == j2) ||
+            (v1 == '-' && setOf('-', 'F', 'L').contains(v2) && i1 == i2 && j1 - 1 == j2) ||
+            (v1 == '|' && setOf('|', 'F', '7').contains(v2) && i1 - 1 == i2 && j1 == j2) ||
+            (v1 == '|' && setOf('|', 'L', 'J').contains(v2) && i1 + 1 == i2 && j1 == j2) ||
+            (v1 == 'S' && setOf('|', 'L', 'J').contains(v2) && i1 + 1 == i2 && j1 == j2) ||
+            (v1 == 'S' && setOf('|', 'F', '7').contains(v2) && i1 - 1 == i2 && j1 == j2) ||
+            (v1 == 'S' && setOf('-', 'J', '7').contains(v2) && i1 == i2 && j1 + 1 == j2) ||
+            (v1 == 'S' && setOf('-', 'F', 'L').contains(v2) && i1 == i2 && j1 - 1 == j2)
+}
 
+fun Input.adjacent(rc: RowCol): List<RowCol> {
+    val (i, j) = rc
+    return listOf(
+        (i - 1 to j),
+        (i + 1 to j),
+        (i to j - 1),
+        (i to j + 1)
+    ).filterNot { isOutOfBounds(it) }
+}
 
-    fun RowCol.isConnectedTo(n: RowCol): Boolean {
-        val (i1, j1) = this
-        val (i2, j2) = n
+fun Input.next(rc: RowCol): List<RowCol> {
+    if (this.get(rc) == '.') return emptyList()
+    return adjacent(rc).filter { isConnected(rc, it) }
+}
 
-        return ((this.get() == 'F') && (n.get() == '-' || n.get() == '7' || n.get() == 'J') && i1 == i2 && j1 + 1 == j2) ||
-                ((this.get() == 'F') && (n.get() == '|' || n.get() == 'J' || n.get() == 'L') && i1 + 1 == i2 && j1 == j2) ||
-                ((this.get() == 'L') && (n.get() == '|' || n.get() == 'F' || n.get() == '7') && i1 - 1 == i2 && j1 == j2) ||
-                ((this.get() == 'L') && (n.get() == '-' || n.get() == 'J' || n.get() == '7') && i1 == i2 && j1 + 1 == j2) ||
-                ((this.get() == '7') && (n.get() == '|' || n.get() == 'J' || n.get() == 'L') && i1 + 1 == i2 && j1 == j2) ||
-                ((this.get() == '7') && (n.get() == '-' || n.get() == 'L' || n.get() == 'F') && i1 == i2 && j1 - 1 == j2) ||
-                ((this.get() == 'J') && (n.get() == '|' || n.get() == '7' || n.get() == 'F') && i1 - 1 == i2 && j1 == j2) ||
-                ((this.get() == 'J') && (n.get() == '-' || n.get() == 'L' || n.get() == 'F') && i1 == i2 && j1 - 1 == j2) ||
-                ((this.get() == '-') && (n.get() == '-' || n.get() == 'J' || n.get() == '7') && i1 == i2 && j1 + 1 == j2) ||
-                ((this.get() == '-') && (n.get() == '-' || n.get() == 'F' || n.get() == 'L') && i1 == i2 && j1 - 1 == j2) ||
-                ((this.get() == '|') && (n.get() == '|' || n.get() == 'F' || n.get() == '7') && i1 - 1 == i2 && j1 == j2) ||
-                ((this.get() == '|') && (n.get() == '|' || n.get() == 'L' || n.get() == 'J') && i1 + 1 == i2 && j1 == j2) ||
-                ((this.get() == 'S') && (n.get() == '|' || n.get() == 'L' || n.get() == 'J') && i1 + 1 == i2 && j1 == j2) ||
-                ((this.get() == 'S') && (n.get() == '|' || n.get() == 'F' || n.get() == '7') && i1 - 1 == i2 && j1 == j2) ||
-                ((this.get() == 'S') && (n.get() == '-' || n.get() == 'J' || n.get() == '7') && i1 == i2 && j1 + 1 == j2) ||
-                ((this.get() == 'S') && (n.get() == '-' || n.get() == 'F' || n.get() == 'L') && i1 == i2 && j1 - 1 == j2)
+fun Input.isEdge(rc: RowCol) =
+    (rc.first == 0 || rc.first == this.size - 1) || (rc.second == 0 || rc.second == this[0].length - 1)
 
-    }
+fun Input.isOutside(rc: RowCol, pathMap: Map<RowCol, Int>, visited: Set<RowCol>): Boolean {
+    if (pathMap.containsKey(rc))
+        return false
 
+    if (isEdge(rc))
+        return true
 
-    fun RowCol.nextMove(): List<RowCol> {
-        val (i, j) = this
-        if (input[i][j] == '.') return emptyList()
-        return listOf(
-            (i - 1 to j),
-            (i + 1 to j),
-            (i to j - 1),
-            (i to j + 1)
-        ).filter { !it.isOutOfBounds() && isConnectedTo(it) }
-    }
+    return adjacent(rc).any { visited.contains(it) }
+}
 
-
-    fun findStart(input: List<String>): RowCol {
-        for (i in input.indices) {
-            for (j in 0..<input[i].length) {
-                if ((i to j).get() == 'S') {
-                    return i to j
-                }
+fun findStart(input: Input): RowCol {
+    for (i in input.indices) {
+        for (j in 0..<input[i].length) {
+            if (input.get(i to j) == 'S') {
+                return i to j
             }
         }
-        error("blip")
+    }
+    error("this should never happen")
+}
+
+fun getPathMap(input: Input): Map<RowCol, Int> {
+    val pathMap = mutableMapOf<RowCol, Int>()
+    val s = findStart(input)
+    val q = LinkedList<RowCol>().apply {
+        add(s)
+        pathMap[s] = 0
     }
 
+    while (q.isNotEmpty()) {
+        val c = q.pop()
+        val curr = pathMap[c] ?: 0
+        val next = input.next(c)
+            .filter { !pathMap.containsKey(it) }
+            .onEach { pathMap[it] = curr + 1 }
+        q.addAll(next)
+    }
+    return pathMap
+}
 
+fun main() {
 
-    fun part1(input: List<String>): Int {
-        val map = mutableMapOf<RowCol, Int>()
-        val s = findStart(input).also { println(it) }
-        val q = LinkedList<RowCol>().apply {
-            add(s)
-            map[s] = 0
-        }
+    fun part1(input: Input): Int {
+        return getPathMap(input).values.max()
+    }
 
-        while (q.isNotEmpty()) {
-            q.println()
-            val c = q.pop()
-            val curr = map[c] ?: 0
-            println("Curr position $c = ${c.get()}")
-
-            val next = c.nextMove()
-                .filter { !map.containsKey(it) }
-                .onEach {
-                    map[it] = curr + 1
-                    println("Next position $it = ${it.get()}")
-                }
-
-            q.addAll(next)
-        }
-
-
+    fun part2(input: Input): Int {
+        val pathMap = getPathMap(input)
         val outside = mutableSetOf<RowCol>()
 
-        fun RowCol.isOutside(): Boolean {
-            if (map.containsKey(this))
-                return false
-
-            val (i,j) = this
-            if ((i == 0 || i == input.size - 1) || (j == 0 || j == input[0].length - 1))
-                return true
-
-            return listOf(
-                i-1 to j,
-                i+1 to j,
-                i to j-1,
-                i to j+1
-            ).any { !it.isOutOfBounds() && outside.contains(it)}
-        }
-
-
-
-        val q2 = LinkedList<RowCol>().apply {
-            input.first().indices.forEach { j ->
-                if ((0 to j).get() == '.')
-                    add(0 to j)
-            }
-            input.last().indices.forEach { j ->
-                if ((input.size - 1 to j).get() == '.')
-                    add(input.size - 1 to j)
-            }
-            (1..input.size-2).forEach {i ->
-                if ((i to 0).get() == '.')
-                    add(i to 0)
-                if ((i to input[i].length-1).get() == '.')
-                    add(i to input[i].length-1)
+        // We're going to "floodfill" for any '.' that sits outside
+        // of our path, starting with edges
+        val queue = LinkedList<RowCol>().apply {
+            input.forEachIndexed { i, line ->
+                line.indices.forEach { j ->
+                    val rc = i to j
+                    if (input.isEdge(rc) && input.get(rc) == '.')
+                        add(rc)
+                }
             }
         }
-        while (q2.isNotEmpty()) {
-            val c = q2.pop()
-            if (map.containsKey(c))
+
+        while (queue.isNotEmpty()) {
+            val c = queue.pop()
+            if (pathMap.containsKey(c))
                 continue
             if (outside.contains(c))
                 continue
-
-            if (c.isOutside()) {
+            if (input.isOutside(c, pathMap, outside)) {
                 outside.add(c)
-                val (i,j) = c
-                q2.addAll(listOf(
-                    i-1 to j,
-                    i+1 to j,
-                    i to j-1,
-                    i to j+1
-                ).filter { !it.isOutOfBounds() })
+                queue.addAll(input.adjacent(c))
             }
         }
 
-        val newInputs = input.indices.mapNotNull { i ->
-            if (i%2 == 1) null
+        // Downscale the input, then count the number of '.'
+        return input.indices.mapNotNull { i ->
+            if (i % 2 == 1) null
             else input[i].indices.map { j ->
-                if (map.containsKey(i to j))
+                if (pathMap.containsKey(i to j))
                     'X'
                 else if (outside.contains(i to j))
                     'O'
                 else '.'
             }.joinToString("").mapIndexed { index, i ->
-                if (index%2 == 1) ""
+                if (index % 2 == 1) ""
                 else i
             }.joinToString("")
-        }.onEach { println(it) }
-
-        val area = newInputs.sumOf {
-            it.count { it == '.' }
-        }
-        println("area = $area")
-        return map.values.max()
+        }.sumOf { it.count { it == '.' } }
     }
 
-
-    fun part2(input: List<String>): Long {
-        val map = mutableMapOf<RowCol, Int>()
-        val s = findStart(input).also { println(it) }
-        val q = LinkedList<RowCol>().apply {
-            add(s)
-            map[s] = 0
-        }
-
-        while (q.isNotEmpty()) {
-            q.println()
-            val c = q.pop()
-            val curr = map[c] ?: 0
-            println("Curr position $c = ${c.get()}")
-
-            val next = c.nextMove()
-                .filter { !map.containsKey(it) }
-                .onEach {
-                    map[it] = curr + 1
-                    println("Next position $it = ${it.get()}")
-                }
-
-            q.addAll(next)
-        }
-
-
-        return 0L
-    }
+    val input = readInput("Day10")
+    val upscaledInput = input.upscale()
 
     part1(input).println()
-//    part2(input).println()
+    part2(upscaledInput).println()
 }
