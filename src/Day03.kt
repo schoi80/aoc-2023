@@ -1,5 +1,3 @@
-typealias RowCol = Pair<Int, Int>
-
 fun main() {
 
     val input = readInput("Day03")

@@ -195,6 +195,6 @@ fun main() {
         }[0].first
     }
 
-    part1(input).println()
+//    part1(input).println()
     part2(input).println()
 }

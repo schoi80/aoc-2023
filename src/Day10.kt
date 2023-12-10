@@ -1,7 +1,5 @@
 import java.util.LinkedList
 
-typealias Input = List<String>
-
 fun Input.upscale(): Input {
     return this.map { line ->
         val newStr = line.map { "$it " }.joinToString("")
@@ -21,47 +19,27 @@ fun Input.upscale(): Input {
         .flatten()
 }
 
-fun Input.isOutOfBounds(rc: RowCol): Boolean {
-    val inRange = rc.first >= 0 && rc.first < this.size && rc.second >= 0 && rc.second < this[rc.first].length
-    return !inRange
-}
-
-fun Input.get(rc: RowCol): Char {
-    return this[rc.first][rc.second]
-}
-
 fun Input.isConnected(n1: RowCol, n2: RowCol): Boolean {
-    val (i1, j1) = n1
-    val (i2, j2) = n2
     val v1 = this.get(n1)
     val v2 = this.get(n2)
-    return (v1 == 'F' && setOf('-', '7', 'J').contains(v2) && i1 == i2 && j1 + 1 == j2) ||
-            (v1 == 'F' && setOf('|', 'J', 'L').contains(v2) && i1 + 1 == i2 && j1 == j2) ||
-            (v1 == 'L' && setOf('|', 'F', '7').contains(v2) && i1 - 1 == i2 && j1 == j2) ||
-            (v1 == 'L' && setOf('-', 'J', '7').contains(v2) && i1 == i2 && j1 + 1 == j2) ||
-            (v1 == '7' && setOf('|', 'J', 'L').contains(v2) && i1 + 1 == i2 && j1 == j2) ||
-            (v1 == '7' && setOf('-', 'L', 'F').contains(v2) && i1 == i2 && j1 - 1 == j2) ||
-            (v1 == 'J' && setOf('|', '7', 'F').contains(v2) && i1 - 1 == i2 && j1 == j2) ||
-            (v1 == 'J' && setOf('-', 'L', 'F').contains(v2) && i1 == i2 && j1 - 1 == j2) ||
-            (v1 == '-' && setOf('-', 'J', '7').contains(v2) && i1 == i2 && j1 + 1 == j2) ||
-            (v1 == '-' && setOf('-', 'F', 'L').contains(v2) && i1 == i2 && j1 - 1 == j2) ||
-            (v1 == '|' && setOf('|', 'F', '7').contains(v2) && i1 - 1 == i2 && j1 == j2) ||
-            (v1 == '|' && setOf('|', 'L', 'J').contains(v2) && i1 + 1 == i2 && j1 == j2) ||
-            (v1 == 'S' && setOf('|', 'L', 'J').contains(v2) && i1 + 1 == i2 && j1 == j2) ||
-            (v1 == 'S' && setOf('|', 'F', '7').contains(v2) && i1 - 1 == i2 && j1 == j2) ||
-            (v1 == 'S' && setOf('-', 'J', '7').contains(v2) && i1 == i2 && j1 + 1 == j2) ||
-            (v1 == 'S' && setOf('-', 'F', 'L').contains(v2) && i1 == i2 && j1 - 1 == j2)
+    return (v1 == 'F' && setOf('-', '7', 'J').contains(v2) && n1.right() == n2) ||
+            (v1 == 'F' && setOf('|', 'J', 'L').contains(v2) && n1.down() == n2) ||
+            (v1 == 'L' && setOf('-', 'J', '7').contains(v2) && n1.right() == n2) ||
+            (v1 == 'L' && setOf('|', 'F', '7').contains(v2) && n1.up() == n2) ||
+            (v1 == '7' && setOf('-', 'L', 'F').contains(v2) && n1.left() == n2) ||
+            (v1 == '7' && setOf('|', 'J', 'L').contains(v2) && n1.down() == n2) ||
+            (v1 == 'J' && setOf('-', 'L', 'F').contains(v2) && n1.left() == n2) ||
+            (v1 == 'J' && setOf('|', '7', 'F').contains(v2) && n1.up() == n2) ||
+            (v1 == '-' && setOf('-', 'F', 'L').contains(v2) && n1.left() == n2) ||
+            (v1 == '-' && setOf('-', 'J', '7').contains(v2) && n1.right() == n2) ||
+            (v1 == '|' && setOf('|', 'F', '7').contains(v2) && n1.up() == n2) ||
+            (v1 == '|' && setOf('|', 'L', 'J').contains(v2) && n1.down() == n2) ||
+            (v1 == 'S' && setOf('|', 'F', '7').contains(v2) && n1.up() == n2) ||
+            (v1 == 'S' && setOf('|', 'L', 'J').contains(v2) && n1.down() == n2) ||
+            (v1 == 'S' && setOf('-', 'F', 'L').contains(v2) && n1.left() == n2) ||
+            (v1 == 'S' && setOf('-', 'J', '7').contains(v2) && n1.right() == n2)
 }
 
-fun Input.adjacent(rc: RowCol): List<RowCol> {
-    val (i, j) = rc
-    return listOf(
-        (i - 1 to j),
-        (i + 1 to j),
-        (i to j - 1),
-        (i to j + 1)
-    ).filterNot { isOutOfBounds(it) }
-}
 
 fun Input.next(rc: RowCol): List<RowCol> {
     if (this.get(rc) == '.') return emptyList()
@@ -154,16 +132,16 @@ fun main() {
                 else if (outside.contains(i to j))
                     'O'
                 else '.'
-            }.joinToString("").mapIndexed { index, i ->
+            }.joinToString("").mapIndexed { index, c ->
                 if (index % 2 == 1) ""
-                else i
+                else c
             }.joinToString("")
         }.sumOf { it.count { it == '.' } }
     }
 
     val input = readInput("Day10")
-    val upscaledInput = input.upscale()
-
     part1(input).println()
-    part2(upscaledInput).println()
+
+    val input2 = input.upscale()
+    part2(input2).println()
 }

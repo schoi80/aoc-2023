@@ -3,6 +3,9 @@ import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
 
+typealias Input = List<String>
+
+
 /**
  * Reads lines from the given input txt file.
  */
@@ -29,3 +32,4 @@ fun Int.cap(cap: Int): Int {
 }
 
 fun Char.hexToBinary() = digitToInt(16).toString(2).padStart(4, '0')
+
