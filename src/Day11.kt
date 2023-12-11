@@ -1,4 +1,6 @@
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 data class VirtualGalaxy(
     val input: Input,
@@ -36,8 +38,8 @@ fun RowCol.distance(rc: RowCol): Long {
 }
 
 fun VirtualGalaxy.calcDistance(rc1: RowCol, rc2: RowCol): Long {
-    val rowRange = listOf(rc1.first, rc2.first).sorted().let { it[0]..it[1] }
-    val colRange = listOf(rc1.second, rc2.second).sorted().let { it[0]..it[1] }
+    val rowRange = min(rc1.first, rc2.first)..max(rc1.first, rc2.first)
+    val colRange = min(rc1.second, rc2.second)..max(rc1.second, rc2.second)
     val e1 = this.exRows.count { rowRange.contains(it) }
     val d1 = (rowRange.last() - rowRange.first()) - e1 + (e1 * this.expandSize)
     val e2 = this.exCols.count { colRange.contains(it) }
@@ -59,7 +61,7 @@ fun main() {
                     stars.add(i to j)
             }
         }
-        return stars.indices.sumOf {i ->
+        return stars.indices.sumOf { i ->
             val origin = stars[i]
             (i..<stars.size).sumOf { origin.distance(stars[it]) }
         }
@@ -81,7 +83,7 @@ fun main() {
             }
         }
 
-        return stars.indices.sumOf {i ->
+        return stars.indices.sumOf { i ->
             val origin = stars[i]
             (i..<stars.size).sumOf { galaxy.calcDistance(origin, stars[it]) }
         }
