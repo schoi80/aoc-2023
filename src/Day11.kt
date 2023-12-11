@@ -30,29 +30,28 @@ fun Input.expand(): Input {
     return this.map { it.expand(expandableCols) }.expand(expandableRows)
 }
 
-fun RowCol.distance(rc: RowCol): Int {
-    return (abs(first - rc.first) + abs(second - rc.second)).also {
-        println("$this -> $rc = $it")
-    }
+fun RowCol.distance(rc: RowCol): Long {
+    return (abs(first - rc.first) + abs(second - rc.second)).toLong()
+        .also { println("$this -> $rc = $it") }
 }
 
 fun VirtualGalaxy.calcDistance(rc1: RowCol, rc2: RowCol): Long {
     val rowRange = listOf(rc1.first, rc2.first).sorted().let { it[0]..it[1] }
     val colRange = listOf(rc1.second, rc2.second).sorted().let { it[0]..it[1] }
-
     val e1 = this.exRows.count { rowRange.contains(it) }
     val d1 = (rowRange.last() - rowRange.first()) - e1 + (e1 * this.expandSize)
-
     val e2 = this.exCols.count { colRange.contains(it) }
     val d2 = (colRange.last() - colRange.first()) - e2 + (e2 * this.expandSize)
 
-    return d1 + d2
+    return (d1 + d2).also { println("$rc1 -> $rc2 = $it") }
 }
 
 fun main() {
 
     fun part1(input: List<String>): Long {
-        val galaxy = input.expand().onEach { println(it) }
+        val galaxy = input.expand()
+//            .onEach { println(it) }
+
         val stars = mutableListOf<RowCol>()
         galaxy.indices.forEach { i ->
             galaxy[0].indices.forEach { j ->
@@ -60,10 +59,10 @@ fun main() {
                     stars.add(i to j)
             }
         }
-        return stars.indices.sumOf {
-            val origin = stars[it]
-            (it..<stars.size).sumOf { origin.distance(stars[it]) }
-        }.toLong()
+        return stars.indices.sumOf {i ->
+            val origin = stars[i]
+            (i..<stars.size).sumOf { origin.distance(stars[it]) }
+        }
     }
 
     fun part2(input: List<String>): Long {
@@ -73,6 +72,7 @@ fun main() {
             exCols = input[0].indices.filter { input.canExpand(it) },
             expandSize = 1000000
         )
+
         val stars = mutableListOf<RowCol>()
         input.indices.forEach { i ->
             input[0].indices.forEach { j ->
@@ -81,9 +81,9 @@ fun main() {
             }
         }
 
-        return stars.indices.sumOf {
-            val origin = stars[it]
-            (it..<stars.size).sumOf { galaxy.calcDistance(origin, stars[it]) }
+        return stars.indices.sumOf {i ->
+            val origin = stars[i]
+            (i..<stars.size).sumOf { galaxy.calcDistance(origin, stars[it]) }
         }
     }
 
