@@ -3,78 +3,83 @@ data class Spring(
     val broken: List<Int>
 )
 
-fun String.parse(): Spring {
-    return split(" ").let {
-        Spring(
-            data = it[0].dropWhile { it == '.' }.dropLastWhile { it == '.' },//.compact(),
-            broken = it[1].split(",").map { it.toInt() }
-        )
-    }
-}
-
-fun String.parse2(): Spring {
-    return split(" ").let {
+fun String.initSpring(factor: Int = 1): Spring {
+    return this.split(" ").let {
         val data = it[0]
         val broken = it[1]
         Spring(
-            data = (0..<5).joinToString("?") { data },
-            broken = (0..<5).joinToString(",") { broken }
+            data = (0..<factor).joinToString("?") { data },
+            broken = (0..<factor).joinToString(",") { broken }
                 .split(",")
                 .map { it.toInt() }
         )
     }
 }
 
-val memoize = mutableMapOf<Pair<Spring, Boolean>, Long>()
-fun Spring.countPossible(endsWithBroken: Boolean = false): Long = memoize.getOrPut(this to endsWithBroken) {
-    if (this.broken.isEmpty() && (this.data.isEmpty() || this.data.all { it == '?' || it == '.' }))
-        return@getOrPut 1
-
+fun Spring.countHash() = data.countHash()
+fun String.countHash() = this.count { it == '#' }
+fun Spring.startsWith(c: Char) = data.startsWith(c)
+fun Spring.isImpossibleState(lastEndedWithHash: Boolean): Boolean {
     // If broken pipes remain, this is not possible path
-    if (this.broken.isEmpty() && this.data.count { it == '#' } > 0)
-        return@getOrPut 0
+    if (broken.isEmpty() && countHash() > 0)
+        return true
 
     // There must be enough chars remaining to satisfy the remaining match
-    if (this.broken.sum() + (this.broken.size - 1) > this.data.length)
+    if (broken.sum() + (broken.size - 1) > data.length)
+        return true
+
+    // If previously ended with #
+    if (lastEndedWithHash && startsWith('#'))
+        return true
+
+    return false
+}
+
+// Advance "data" by 1 char
+fun Spring.advanceByData() = this.copy(data = this.data.drop(1))
+
+// Advance by first broken size
+fun Spring.advanceByBroken() = Spring(data = data.drop(broken.first()), broken = broken.drop(1))
+
+// Memoize this recursion.
+val cache = mutableMapOf<Pair<Spring, Boolean>, Long>()
+fun Spring.countPossible(lastEndedWithHash: Boolean = false): Long = cache.getOrPut(this to lastEndedWithHash) {
+    if (this.isImpossibleState(lastEndedWithHash))
         return@getOrPut 0
 
-    if (endsWithBroken) {
-        return@getOrPut if (this.data.startsWith('#')) 0
-        else Spring(data = this.data.drop(1), broken = this.broken).countPossible(false)
-    } else {
-        if (this.data.first() == '?' || this.data.first() == '#') {
+    if (this.broken.isEmpty() && (this.data.isEmpty() || this.countHash() == 0))
+        return@getOrPut 1
 
-            // Scenario 1.  assume it's broken only if the next "brokenCount" is all # and ?
-            val brokenCount = this.broken.first()
-            val next = this.data.take(brokenCount)
-
-            if (next.count { it == '#' } == next.length) {
-                return@getOrPut Spring(data = this.data.drop(brokenCount), broken = this.broken.drop(1)).countPossible(
-                    true
-                )
-            } else {
-                val a = if (next.count { it == '#' || it == '?' } == next.length)
-                    Spring(data = this.data.drop(brokenCount), broken = this.broken.drop(1)).countPossible(true)
-                else 0
-
-                // Scenario 2.  assume it's not broken
-                val b = if (!next.startsWith('#'))
-                    Spring(data = this.data.drop(1), broken = this.broken).countPossible(false)
-                else 0
-
-                return@getOrPut a + b
-            }
+    if (!lastEndedWithHash && !this.startsWith('.')) {
+        // Take a peek at head of the data
+        val head = this.data.take(this.broken.first())
+        // If head is all #####, then we must take this
+        if (head.countHash() == head.length) {
+            return@getOrPut this.advanceByBroken().countPossible(true)
         } else {
-            return@getOrPut Spring(data = this.data.drop(1), broken = this.broken).countPossible(false)
+            // If head is combination of ? and #
+            val a = if (head.count { it != '.' } == head.length)
+                this.advanceByBroken().countPossible(true)
+            else 0
+
+            // If head doesn't start with a definitive broken,
+            // then assume it is not broken then move forward
+            val b = if (!head.startsWith('#'))
+                this.advanceByData().countPossible(false)
+            else 0
+
+            return@getOrPut a + b
         }
     }
+    // Advance by 1 char and move on
+    return@getOrPut this.advanceByData().countPossible(false)
 }
 
 fun main() {
 
     fun part1(input: List<String>): Long {
         return input.sumOf {
-            it.parse()
+            it.initSpring()
                 .also { println("Processing $it") }
                 .countPossible()
                 .also { println("Possible: $it") }
@@ -83,7 +88,7 @@ fun main() {
 
     fun part2(input: List<String>): Long {
         return input.sumOf {
-            it.parse2()
+            it.initSpring(5)
                 .also { println("Processing $it") }
                 .countPossible()
                 .also { println("Possible: $it") }
