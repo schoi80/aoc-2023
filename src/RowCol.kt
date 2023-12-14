@@ -62,3 +62,11 @@ fun RowCol.right() = first to second + 1
 fun Input.adjacent(rc: RowCol): List<RowCol> {
     return listOf(rc.up(), rc.down(), rc.left(), rc.right()).filterNot { isOutOfBounds(it) }
 }
+
+typealias MutableInput<T> = Array<Array<T>>
+
+inline fun <reified T> Input.toMutableInput(fn:(Char) -> T): MutableInput<T> {
+    return this.map { s ->
+        s.map(fn).toTypedArray()
+    }.toTypedArray()
+}
