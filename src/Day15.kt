@@ -1,5 +1,5 @@
 fun Char.convert(curr: Long = 0): Long {
-    return (curr + this.toInt()) * 17 % 256
+    return (curr + this.code) * 17 % 256
 }
 
 fun String.convert(): Long {
@@ -51,17 +51,15 @@ fun main() {
             if (tokens.size == 2) {
                 val lens = tokens[0]
                 val fl = tokens[1].toInt()
-                val boxIndex = lens.convert().toInt()
-                boxes[boxIndex].add(lens, fl)
+                val index = lens.convert().toInt()
+                boxes[index].add(lens, fl)
             } else {
                 val lens = it.take(it.length - 1)
-                val boxIndex = lens.convert().toInt()
-                boxes[boxIndex].remove(lens)
+                val index = lens.convert().toInt()
+                boxes[index].remove(lens)
             }
         }
-        return boxes.mapIndexed { index, box ->
-            (index + 1) * box.calc()
-        }.sum()
+        return boxes.mapIndexed { i, box -> (i + 1) * box.calc() }.sum()
     }
 
     val input = readInput("Day15")
