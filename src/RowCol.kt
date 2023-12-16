@@ -19,6 +19,11 @@ fun Input.isOutOfBounds(rc: RowCol): Boolean {
     return !inRange
 }
 
+fun MutableInput<*>.isOutOfBounds(rc: RowCol): Boolean {
+    val inRange = rc.first >= 0 && rc.first < this.size && rc.second >= 0 && rc.second < this[rc.first].size
+    return !inRange
+}
+
 /**
  * Retrieves the character at the specified row-column pair in the input grid.
  *
