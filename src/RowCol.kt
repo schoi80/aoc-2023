@@ -19,7 +19,7 @@ fun Input.isOutOfBounds(rc: RowCol): Boolean {
     return !inRange
 }
 
-fun MutableInput<*>.isOutOfBounds(rc: RowCol): Boolean {
+fun <T> MutableInput<T>.isOutOfBounds(rc: RowCol): Boolean {
     val inRange = rc.first >= 0 && rc.first < this.size && rc.second >= 0 && rc.second < this[rc.first].size
     return !inRange
 }
@@ -68,7 +68,13 @@ fun Input.adjacent(rc: RowCol): List<RowCol> {
     return listOf(rc.up(), rc.down(), rc.left(), rc.right()).filterNot { isOutOfBounds(it) }
 }
 
+fun <T> MutableInput<T>.adjacent(rc: RowCol): List<RowCol> {
+    return listOf(rc.up(), rc.down(), rc.left(), rc.right()).filterNot { isOutOfBounds(it) }
+}
+
 typealias MutableInput<T> = Array<Array<T>>
+
+fun <T> MutableInput<T>.get(rc:RowCol) = this[rc.first][rc.second]
 
 inline fun <reified T> Input.toMutableInput(fn:(Char) -> T): MutableInput<T> {
     return this.map { s ->
