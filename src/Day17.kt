@@ -29,38 +29,28 @@ fun MutableInput<Long>.isEnd(curr: Position): Boolean {
     return (i == this.size - 1 && j == this[0].size - 1)
 }
 
-fun MutableInput<Long>.minDistance(): Long {
-    val maxInDirection = 3
-    val start = Position(rc = 0 to 0)
-    val visited = mutableMapOf<Position, Long>().apply { put(start, 0L) }
-    val q = PriorityQueue(compareBy<Position> { visited[it] ?: Long.MAX_VALUE }) //<CurrPosition>()
-    q.add(start)
-    while (q.isNotEmpty()) {
-        val curr = q.poll()
-        if (this.isEnd(curr))
-            continue
-        this.adjacent(curr.rc)
-            .map { it to getDirection(curr.rc, it) }
-            .filter { (_, dir) ->
-                val isOpposite = curr.lastMoves.lastOrNull()?.isOpposite(dir) ?: false
-                val isNotRepeated = curr.lastMoves.count { it == dir } < maxInDirection
-                !isOpposite && isNotRepeated
-            }
-            .forEach { (next, dir) ->
-                val nextPos = Position(rc = next, lastMoves = (curr.lastMoves + dir).takeLast(maxInDirection))
-                val cost = visited[curr]!! + this.get(nextPos.rc)
-                if (cost < (visited[nextPos] ?: Long.MAX_VALUE)) {
-                    visited[nextPos] = cost
-                    q.add(nextPos)
-                }
-            }
-    }
+typealias CruciblePath = MutableMap<Position, Long>
 
-    return visited.filterKeys { this.isEnd(it) }.values.min()
+fun canMoveInDirection1(curr: Position, dir: Direction, maxInDirection: Int): Boolean {
+    val isOpposite = curr.lastMoves.lastOrNull()?.isOpposite(dir) ?: false
+    val maxNotReached = curr.lastMoves.count { it == dir } < maxInDirection
+    return !isOpposite && maxNotReached
 }
 
-fun MutableInput<Long>.minDistance2(): Long {
-    val maxInDirection = 10
+fun canMoveInDirection2(curr: Position, dir: Direction, maxInDirection: Int): Boolean {
+    val canTurn = if (curr.lastMoves.isNotEmpty()) {
+        val lastMove = curr.lastMoves.last()
+        if (dir != lastMove) {
+            curr.lastMoves.takeLast(4).count { it == lastMove } == 4
+        } else true
+    } else true
+    return canMoveInDirection1(curr, dir, maxInDirection) && canTurn
+}
+
+fun MutableInput<Long>.minHeatLossPath(
+    maxInDirection: Int = 10,
+    canMoveInDirection: (Position, Direction, Int) -> Boolean
+): CruciblePath {
     val start = Position(rc = 0 to 0)
     val visited = mutableMapOf<Position, Long>().apply { put(start, 0L) }
     val q = PriorityQueue(compareBy<Position> { visited[it] ?: Long.MAX_VALUE }) //<CurrPosition>()
@@ -71,17 +61,7 @@ fun MutableInput<Long>.minDistance2(): Long {
             continue
         this.adjacent(curr.rc)
             .map { it to getDirection(curr.rc, it) }
-            .filter { (_, dir) ->
-                val isOpposite = curr.lastMoves.lastOrNull()?.isOpposite(dir) ?: false
-                val isNotRepeated = curr.lastMoves.count { it == dir } < maxInDirection
-                val canTurn = if (curr.lastMoves.isNotEmpty()) {
-                    val lastMove = curr.lastMoves.last()
-                    if (dir != lastMove) {
-                        curr.lastMoves.takeLast(4).count { it == lastMove } == 4
-                    } else true
-                } else true
-                !isOpposite && isNotRepeated && canTurn
-            }
+            .filter { (_, dir) -> canMoveInDirection(curr, dir, maxInDirection) }
             .forEach { (next, dir) ->
                 val nextPos = Position(rc = next, lastMoves = (curr.lastMoves + dir).takeLast(maxInDirection))
                 val cost = visited[curr]!! + this.get(nextPos.rc)
@@ -92,20 +72,24 @@ fun MutableInput<Long>.minDistance2(): Long {
             }
     }
 
-    return visited.filterKeys {
-        this.isEnd(it) && it.lastMoves.takeLast(4).distinct().count() == 1
-    }.values.min()
+    return visited
 }
 
 
 fun main() {
 
     fun part1(input: List<String>): Long {
-        return input.toMutableInput { it.digitToInt().toLong() }.minDistance()
+        val grid = input.toMutableInput { it.digitToInt().toLong() }
+        return grid.minHeatLossPath(3, ::canMoveInDirection1)
+            .filterKeys { grid.isEnd(it) }
+            .values.min()
     }
 
     fun part2(input: List<String>): Long {
-        return input.toMutableInput { it.digitToInt().toLong() }.minDistance2()
+        val grid = input.toMutableInput { it.digitToInt().toLong() }
+        return grid.minHeatLossPath(10, ::canMoveInDirection2)
+            .filterKeys { grid.isEnd(it) && it.lastMoves.takeLast(4).distinct().count() == 1 }
+            .values.min()
     }
 
     val input = readInput("Day17")
