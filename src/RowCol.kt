@@ -75,6 +75,9 @@ fun <T> MutableInput<T>.adjacent(rc: RowCol): List<RowCol> {
 typealias MutableInput<T> = Array<Array<T>>
 
 fun <T> MutableInput<T>.get(rc:RowCol) = this[rc.first][rc.second]
+fun <T> MutableInput<T>.set(rc:RowCol, v:T) {
+    this[rc.first][rc.second] = v
+}
 
 inline fun <reified T> Input.toMutableInput(fn:(Char) -> T): MutableInput<T> {
     return this.map { s ->
