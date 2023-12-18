@@ -76,17 +76,6 @@ fun MutableInput<Char>.mark(start: RowCol, p: DigPlan): RowCol {
     return curr
 }
 
-fun MutableInput<Char>.next(start: RowCol, p: DigPlan): RowCol {
-    var count = 0
-    var curr = start
-    while (count < p.v) {
-        curr = curr.move(p.d)
-        this.set(curr, '#')
-        count++
-    }
-    return curr
-}
-
 fun MutableInput<Char>.fill(pos: RowCol) {
     val q = LinkedList<RowCol>()
     q.add(pos)
