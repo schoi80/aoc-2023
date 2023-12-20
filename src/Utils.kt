@@ -30,3 +30,10 @@ fun Int.cap(cap: Int): Int {
 
 fun Char.hexToBinary() = digitToInt(16).toString(2).padStart(4, '0')
 
+fun gcd(a: Long, b: Long): Long {
+    return if (b == 0L) a else gcd(b, a % b)
+}
+
+fun lcm(a: Long, b: Long): Long {
+    return (a * b) / gcd(a, b)
+}
