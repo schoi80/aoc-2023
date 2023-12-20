@@ -37,13 +37,13 @@ sealed class Module(val name: String, var next: List<String>) {
             source.forEach { srcMap[it] = SignalType.LOW }
         }
 
+        fun getSource() = srcMap.keys
+
         override fun handleSignal(input: Signal): List<Signal> {
             val (src, st, _) = input
             srcMap[src] = st
             val signalToSend = if (srcMap.values.all { it == SignalType.HIGH }) SignalType.LOW else SignalType.HIGH
-            return next.map {
-                Triple(name, signalToSend, it)
-            }
+            return next.map { Triple(name, signalToSend, it) }
         }
     }
 }
@@ -105,15 +105,16 @@ fun main() {
         val queue = LinkedList<Signal>()
         var buttonCount = 0L
 
-        // I pulled them from the input.  These must send HIGH in order for rx to receive LOW
-        val modulesOfInterest = setOf("sr", "sn", "rf", "vq")
+        // so "rx" receives input from "hp", which is a conjunction.
+        // hence, all sources of "hp" must send HIGH in order for rx to receive LOW
+        val rxSource = (circuit["hp"] as? Module.Conjunction)?.getSource() ?: setOf()
         val cycleCounts = mutableListOf<Long>()
-        while (cycleCounts.size < 4) {
+        while (cycleCounts.size < rxSource.size) {
             buttonCount++
             queue.add(Triple("button", SignalType.LOW, "broadcaster"))
             while (queue.isNotEmpty()) {
                 val signal = queue.pop()
-                if (signal.first in modulesOfInterest && signal.second == SignalType.HIGH) {
+                if (signal.first in rxSource && signal.second == SignalType.HIGH) {
                     println("${signal.first} sent ${signal.second} on button click $buttonCount")
                     cycleCounts.add(buttonCount)
                 }
