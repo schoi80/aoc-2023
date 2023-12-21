@@ -83,7 +83,7 @@ fun main() {
 //                val nd2 = nd1 - d1
 //                val nd3 = nd2 - d2
 //                if (i%131 == 65)
-//                println("$i;${it.size};$nd1;$nd2;$nd3")
+//                  println("$i;${it.size};$nd1;$nd2;$nd3")
 //                d1 = nd1
 //                d2 = nd2
 //                d3 = nd3
@@ -91,10 +91,18 @@ fun main() {
 //        }
 //        return r.size.toLong()
 
+        // There is a cycle in every 131 steps.
+        val cycleCount = (26501365 / 131).toLong()
+
         // I'm too dumb to calculate quad formula.
+        // Based on output from above commented code, here are the first 3 outputs from every 131 steps after 65 steps
+        // step 65 = 3701
+        // step 196 (65 + 131) = 33108
+        // step 327 (65 + 131 * 2) = 91853
+        // Plug it into Wolfram to get the formula
         // https://www.wolframalpha.com/input?i=quadratic+fit+calculator&assumption=%7B%22F%22%2C+%22QuadraticFitCalculator%22%2C+%22data3x%22%7D+-%3E%22%7B0%2C+1%2C+2%2C+3%7D%22&assumption=%7B%22F%22%2C+%22QuadraticFitCalculator%22%2C+%22data3y%22%7D+-%3E%22%7B3701%2C33108%2C91853%2C179936%7D%22
-        val x = 202300L
-        return (x * x * 14669) + (14738 * x) + 3701
+        // which yields 14669x^2 + 14738x + 3701
+        return (cycleCount * cycleCount * 14669) + (14738 * cycleCount) + 3701
     }
 
     val input = readInput("Day21")
