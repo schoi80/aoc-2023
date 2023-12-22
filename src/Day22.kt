@@ -37,8 +37,8 @@ data class Brick(
         zRange = h..(h + (z2 - z1))
     }
 
-    fun isKeyBrick(): Boolean {
-        return supports.isNotEmpty() && supports.count { it.supportedBy.size == 1 } > 0
+    fun canDisintegrate(): Boolean {
+        return !(supports.isNotEmpty() && supports.count { it.supportedBy.size == 1 } > 0)
     }
 
     fun countFall(): Int {
@@ -98,12 +98,12 @@ fun Input.settleBricks(): List<Brick> {
 fun main() {
 
     fun part1(input: List<String>): Int {
-        return input.settleBricks().count { !it.isKeyBrick() }
+        return input.settleBricks().count { it.canDisintegrate() }
     }
 
     fun part2(input: List<String>): Int {
         val bricks = input.settleBricks()
-        val keyBricks = bricks.filter { it.isKeyBrick() }
+        val keyBricks = bricks.filter { !it.canDisintegrate() }
         return keyBricks.sumOf {
             // Reset crumbed state
             bricks.forEach { it.isCrumbled = false }
