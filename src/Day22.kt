@@ -61,7 +61,7 @@ fun Input.settleBricks(): List<Brick> {
     val bricks = this.mapIndexed { i, it -> Brick.init(it, (i + 1).toString()) }
 
     // Bricks fall in the order of its lower z
-    val pq = PriorityQueue(compareBy<Brick> { min(it.z1, it.z2) })
+    val pq = PriorityQueue(compareBy<Brick> { it.z1 })
     pq.addAll(bricks)
 
     // Bricks by its upper z after settling
