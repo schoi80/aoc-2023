@@ -59,28 +59,38 @@ data class Brick(
 
 fun Input.settleBricks(): List<Brick> {
     val bricks = this.mapIndexed { i, it -> Brick.init(it, (i + 1).toString()) }
+
+    // Bricks fall in the order of its lower z
     val pq = PriorityQueue(compareBy<Brick> { min(it.z1, it.z2) })
     pq.addAll(bricks)
-    val bricksByZ = PriorityQueue(compareBy<Brick> { it.z2 * -1 })
+
+    // Bricks by its upper z after settling
+    val settledBricks = PriorityQueue(compareBy<Brick> { it.z2 * -1 })
     while (pq.isNotEmpty()) {
         val b1 = pq.poll()
-        val tempStack = Stack<Brick>()
-        while (bricksByZ.isNotEmpty()) {
-            if (bricksByZ.peek().intersects(b1)) break
-            tempStack.push(bricksByZ.poll())
-        }
-        if (bricksByZ.isEmpty())
-            b1.settle(1)
-        else
-            b1.settle(bricksByZ.peek().z2 + 1)
 
-        bricksByZ.add(b1)
+        // Start popping the settle bricks until we find one that can be a support
+        val tempStack = Stack<Brick>()
+        while (settledBricks.isNotEmpty()) {
+            if (settledBricks.peek().intersects(b1)) break
+            tempStack.push(settledBricks.poll())
+        }
+
+        // If no more bricks left, this one will settle on the ground level
+        // Otherwise, put this one on top of the highest settled brick
+        val settleLevel =
+            if (settledBricks.isEmpty()) 1
+            else settledBricks.peek().z2 + 1
+        settledBricks.add(b1.apply { settle(settleLevel) })
+
+        // Move the popped bricks back in
         while (tempStack.isNotEmpty()) {
-            bricksByZ.add(tempStack.pop())
+            settledBricks.add(tempStack.pop())
         }
     }
 
-    val bricksByLevel = bricksByZ.groupBy { it.z1 }
+    // Build the bricks dependency
+    val bricksByLevel = settledBricks.groupBy { it.z1 }
     bricksByLevel.forEach { (_, bricks) ->
         for (b1 in bricks) {
             bricksByLevel[b1.z2 + 1]?.forEach { b2 ->
