@@ -37,3 +37,6 @@ fun gcd(a: Long, b: Long): Long {
 fun lcm(a: Long, b: Long): Long {
     return (a * b) / gcd(a, b)
 }
+
+fun IntRange.intersects(r: IntRange): Boolean =
+    first <= r.last && last >= r.first
