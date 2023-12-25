@@ -36,7 +36,7 @@ object Day24Part2 {
 
 
     fun part2(input: List<String>): Long = with(Context()) {
-        val pvs = input.map { Day24Part2.Hailstone.init(it) }
+        val pvs = input.map { Hailstone.init(it) }
         val solver = mkSolver()
         val x = mkRealConst("x")
         val y = mkRealConst("y")
