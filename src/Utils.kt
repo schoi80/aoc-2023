@@ -39,3 +39,5 @@ fun lcm(a: Long, b: Long): Long {
 }
 
 fun IntRange.intersects(r: IntRange): Boolean = first <= r.last && last >= r.first
+
+fun Pair<Double, Double>.intersects(r: Pair<Double, Double>) = first <= r.second && second >= r.first

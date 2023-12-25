@@ -13,3 +13,7 @@ tasks {
         gradleVersion = "8.5"
     }
 }
+
+dependencies {
+    implementation("tools.aqua:z3-turnkey:4.12.2.1")
+}
