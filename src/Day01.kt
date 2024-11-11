@@ -9,7 +9,7 @@ fun main() {
         }
     }
 
-    fun replaceNumber(r:String): String {
+    fun replaceNumber(r: String): String {
         return when (r) {
             "one" -> "1"
             "two" -> "2"
@@ -38,7 +38,7 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return input.sumOf {orig ->
+        return input.sumOf { orig ->
             findFirstAndLast(orig).also {
                 println("$orig: $it")
             }
